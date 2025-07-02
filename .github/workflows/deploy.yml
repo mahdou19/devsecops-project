@@ -46,3 +46,12 @@ jobs:
         run: |
           docker build -t devsecops-node .
           trivy image --severity HIGH,CRITICAL devsecops-node
+
+      - name: Installer Conftest
+        run: |
+          wget https://github.com/open-policy-agent/conftest/releases/latest/download/conftest_Linux_x86_64.tar.gz
+          tar -xzf conftest_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin
+
+      - name: Vérification sécurité avec Conftest
+        run: conftest test deployment.yaml --policy policy
