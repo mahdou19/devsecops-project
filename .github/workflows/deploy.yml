@@ -4,7 +4,10 @@ name: Deploy App
 on:
   push:
     branches:
-      - main
+      - test
+  pull_request:
+    branches:
+      - test
 
 env:
   GCP_REGION: ${{ vars.GCP_REGION }}
