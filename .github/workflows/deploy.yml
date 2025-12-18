@@ -46,7 +46,9 @@ jobs:
         id: "auth"
         uses: "google-github-actions/auth@v1"
         with:
+          # Workload identity provider identifier is not secret; keep it as a repo Variable.
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          # Service account email is treated as a secret (minimal secrets kept here).
           service_account: ${{ secrets.SERVICE_ACCOUNT_TEST }}
 
       - name: "Set up Cloud SDK"
