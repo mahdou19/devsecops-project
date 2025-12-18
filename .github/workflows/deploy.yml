@@ -31,32 +31,41 @@ jobs:
       REPOSITORY_NAME: ajustement-auto-repo
       IMAGE_NAME: ajustement-auto
 
+    
+env:
+  GCP_REGION: ${{ vars.GCP_REGION }}
+  REPOSITORY_NAME: ajustement-auto-repo
+  IMAGE_NAME: ajustement-auto
+
+jobs:
+  build_and_deploy_test:
+    name: Build & Deploy to Test
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/test'
+
+    environment: Test
+
+    env:
+      PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
+      WIF_PROVIDER: ${{ secrets.GCP_WIF_PROVIDER }}
+      GCP_REGION: europe-west9
+      REPOSITORY_NAME: ajustement-auto-repo
+      IMAGE_NAME: ajustement-auto
+
     permissions:
       contents: read
       id-token: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+        - name: 'Checkout'
+          uses: 'actions/checkout@v3'
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ env.GCP_WIF_PROVIDER }}
-          service_account: ${{ env.SERVICE_ACCOUNT }}
 
-      - name: Set up gcloud
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Configure Docker auth for Artifact Registry
-        run: |
-          echo "gcloud auth list"
-          gcloud auth list
-          echo "Configure Docker"
-          gcloud auth configure-docker "${{ env.GCP_REGION }}-docker.pkg.dev" --quiet
-
-      - name: Build and push Docker image
-        run: |
-          IMAGE_PATH="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-          docker build -t "$IMAGE_PATH" .
-          docker push "$IMAGE_PATH"
+        - name: 'Google auth'
+          id: 'auth'
+          uses: 'google-github-actions/auth@v1'
+          with:
+            workload_identity_provider: 'projects/1077512308788/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+            service_account: 'my-service-account@project-e82b0d81-c629-4a85-bc1.iam.gserviceaccount.com'
