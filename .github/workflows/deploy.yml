@@ -60,9 +60,9 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           IMAGE_PATH="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-          gcloud run services update hello \
-            --image "$IMAGE_PATH" \
-            --region europe-west1 \
-            --platform managed \
-            --allow-unauthenticated \
-            --quiet
+          gcloud run services update ajustement-auto-service \
+          --image "$IMAGE_PATH" \
+          --region europe-west9 \
+          --platform managed \
+          --quiet
+          echo "Deployed to Cloud Run successfully."
