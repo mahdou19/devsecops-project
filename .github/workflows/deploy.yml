@@ -54,19 +54,77 @@ jobs:
           project_id: "${{ env.PROJECT_ID }}"
 
       - name: "Docker auth"
-        run: |-
+        run: |
           gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
       - name: "Build and push Docker image"
-        run: |-
+        run: |
           IMAGE_PATH="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
           docker build -t "$IMAGE_PATH" .
           docker push "$IMAGE_PATH"
-      - name: Deploy to Cloud Run
+
+      - name: Deploy to Cloud Run (Test)
         run: |
           IMAGE_PATH="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-          gcloud run services update ajustement-auto-service \
-          --image "$IMAGE_PATH" \
-          --region europe-west9 \
-          --platform managed \
-          --quiet
-          echo "Deployed to Cloud Run successfully."
+          gcloud run services update "${{ env.SERVICE_NAME }}" \
+            --image "$IMAGE_PATH" \
+            --region "${{ env.GAR_LOCATION }}" \
+            --quiet
+          echo "Deployed to Cloud Run (test) successfully."
+
+  build_and_deploy_prod:
+    name: Build & Deploy to Production
+    runs-on: ubuntu-latest
+
+    # Run on push to main OR when manually triggered with workflow_dispatch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' && (github.event.inputs.target == 'prod' || github.event.inputs.target == 'production')
+
+    environment: production
+
+    env:
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_PROD }}
+      GAR_LOCATION: ${{ secrets.GAR_LOCATION_PROD || secrets.GAR_LOCATION }}
+      REPOSITORY_NAME: ${{ secrets.GAR_REPOSITORY_NAME }}
+      IMAGE_NAME: ${{ secrets.GAR_IMAGE_NAME }}
+      SERVICE_NAME: ${{ secrets.CLOUD_RUN_SERVICE_PROD }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v3"
+
+      - name: "Google auth (Workload Identity)"
+        id: "auth-prod"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_PROD }}
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v1"
+        with:
+          project_id: "${{ env.PROJECT_ID }}"
+
+      - name: "Docker auth"
+        run: |
+          gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
+      - name: "Build and push Docker image (prod)"
+        run: |
+          IMAGE_TAG="${{ github.sha }}"
+          IMAGE_PATH="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
+          docker build -t "$IMAGE_PATH" .
+          docker push "$IMAGE_PATH"
+
+      - name: "Deploy to Cloud Run (Production)"
+        run: |
+          IMAGE_TAG="${{ github.sha }}"
+          IMAGE_PATH="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
+          gcloud run services update "${{ env.SERVICE_NAME }}" \
+            --image "$IMAGE_PATH" \
+            --region "${{ env.GAR_LOCATION }}" \
+            --quiet
+          echo "Deployed to Cloud Run (production) successfully."
