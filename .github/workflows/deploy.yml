@@ -26,12 +26,13 @@ jobs:
     environment: testing
 
     env:
-      # Per-environment values should be stored in GitHub Secrets
-      PROJECT_ID: ${{ secrets.GCP_PROJECT_TEST }}
-      GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
-      REPOSITORY_NAME: ${{ secrets.GAR_REPOSITORY_NAME }}
-      IMAGE_NAME: ${{ secrets.GAR_IMAGE_NAME }}
-      SERVICE_NAME: ${{ secrets.CLOUD_RUN_SERVICE_TEST }}
+      # Non-sensitive environment values come from repo Variables (vars).
+      # Keep only truly sensitive values in Secrets (service account credentials).
+      PROJECT_ID: ${{ secrets.PROJECT_ID_TEST }}
+      GAR_LOCATION: ${{ vars.GAR_LOCATION }}
+      REPOSITORY_NAME: ${{ vars.GAR_REPOSITORY_NAME }}
+      IMAGE_NAME: ${{ vars.GAR_IMAGE_NAME }}
+      SERVICE_NAME: ${{ vars.CLOUD_RUN_SERVICE_TEST }}
 
     permissions:
       contents: read
@@ -82,11 +83,11 @@ jobs:
     environment: production
 
     env:
-      PROJECT_ID: ${{ secrets.GCP_PROJECT_PROD }}
-      GAR_LOCATION: ${{ secrets.GAR_LOCATION_PROD || secrets.GAR_LOCATION }}
-      REPOSITORY_NAME: ${{ secrets.GAR_REPOSITORY_NAME }}
-      IMAGE_NAME: ${{ secrets.GAR_IMAGE_NAME }}
-      SERVICE_NAME: ${{ secrets.CLOUD_RUN_SERVICE_PROD }}
+      PROJECT_ID: ${{ secrets.PROJECT_ID_PROD }}
+      GAR_LOCATION: ${{ vars.GAR_LOCATION_PROD || vars.GAR_LOCATION }}
+      REPOSITORY_NAME: ${{ vars.GAR_REPOSITORY_NAME }}
+      IMAGE_NAME: ${{ vars.GAR_IMAGE_NAME }}
+      SERVICE_NAME: ${{ vars.CLOUD_RUN_SERVICE_PROD }}
 
     permissions:
       contents: read
