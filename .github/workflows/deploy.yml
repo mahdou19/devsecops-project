@@ -43,3 +43,12 @@ jobs:
         with:
           workload_identity_provider: "projects/1077512308788/locations/global/workloadIdentityPools/my-pool/providers/my-provider"
           service_account: "my-service-account@project-e82b0d81-c629-4a85-bc1.iam.gserviceaccount.com"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v1"
+        with:
+          project_id: "${{ env.PROJECT_ID }}"
+
+      - name: "Docker auth"
+        run: |-
+          gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
