@@ -23,13 +23,15 @@ jobs:
 
     if: github.event_name == 'push' && github.ref == 'refs/heads/test'
 
-    environment: Test
+    environment: testing
 
     env:
-      PROJECT_ID: "project-e82b0d81-c629-4a85-bc1"
-      GAR_LOCATION: europe-west9
-      REPOSITORY_NAME: ajustement-auto-repo
-      IMAGE_NAME: ajustement-auto
+      # Per-environment values should be stored in GitHub Secrets
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_TEST }}
+      GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
+      REPOSITORY_NAME: ${{ secrets.GAR_REPOSITORY_NAME }}
+      IMAGE_NAME: ${{ secrets.GAR_IMAGE_NAME }}
+      SERVICE_NAME: ${{ secrets.CLOUD_RUN_SERVICE_TEST }}
 
     permissions:
       contents: read
@@ -39,12 +41,12 @@ jobs:
       - name: "Checkout"
         uses: "actions/checkout@v3"
 
-      - name: "Google auth"
+      - name: "Google auth (Workload Identity)"
         id: "auth"
         uses: "google-github-actions/auth@v1"
         with:
-          workload_identity_provider: "projects/1077512308788/locations/global/workloadIdentityPools/my-pool/providers/my-provider"
-          service_account: "my-service-account@project-e82b0d81-c629-4a85-bc1.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_TEST }}
 
       - name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v1"
