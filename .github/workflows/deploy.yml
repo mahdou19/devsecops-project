@@ -24,10 +24,8 @@ jobs:
     environment: Test
 
     env:
-      PROJECT_ID: ${{ secrets.PROJECT_ID }}
-      SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
-      WIF_PROVIDER: ${{ secrets.GCP_WIF_PROVIDER }}
-      GCP_REGION: europe-west9
+      PROJECT_ID: "project-e82b0d81-c629-4a85-bc1"
+      GAR_LOCATION: europe-west9
       REPOSITORY_NAME: ajustement-auto-repo
       IMAGE_NAME: ajustement-auto
 
