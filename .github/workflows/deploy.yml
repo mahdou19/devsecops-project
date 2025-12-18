@@ -5,14 +5,16 @@ on:
   push:
     branches:
       - test
+      - main
   pull_request:
     branches:
       - test
-
-# env:
-#   GCP_REGION: ${{ vars.GCP_REGION }}
-#   REPOSITORY_NAME: ajustement-auto-repo
-#   IMAGE_NAME: ajustement-auto
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which environment to deploy (test or prod)"
+        required: false
+        default: "prod"
 
 jobs:
   build_and_deploy_test:
