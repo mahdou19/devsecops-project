@@ -57,12 +57,12 @@ jobs:
           IMAGE_PATH="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
           docker build -t "$IMAGE_PATH" .
           docker push "$IMAGE_PATH"
-      - name: "Deploy to Cloud Run"
-        run: |-
+      - name: Deploy to Cloud Run
+        run: |
           IMAGE_PATH="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-          gcloud run update ajustement-auto-service \
+          gcloud run services update hello \
             --image "$IMAGE_PATH" \
-            --region europe-west9 \
+            --region europe-west1 \
             --platform managed \
             --allow-unauthenticated \
             --quiet
